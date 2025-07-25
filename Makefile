@@ -7,7 +7,7 @@ PROJECT_REPO := github.com/crossplane-contrib/$(PROJECT_NAME)
 
 
 export TERRAFORM_VERSION := 1.5.5
-export TERRAFORM_PROVIDER_VERSION := 6.2.2
+export TERRAFORM_PROVIDER_VERSION := 6.5.0
 export TERRAFORM_PROVIDER_SOURCE := integrations/github
 export TERRAFORM_PROVIDER_REPO := https://github.com/integrations/terraform-provider-github
 export TERRAFORM_DOCS_PATH := website/docs/r

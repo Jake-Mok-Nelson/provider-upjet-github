@@ -64,6 +64,8 @@ var terraformPluginSDKExternalNameConfigs = map[string]config.ExternalName{
 	// Imported by using the following format: github_repository_file.gitignore {{repository}}/{{file}}:{{branch}}
 	// We cannot use file as external name since filenames are not DNSSpec and metadata.name requires this.
 	"github_repository_file": config.IdentifierFromProvider,
+	// Imported by using the following format: <org>:<repo>:<property_name>
+	"github_repository_custom_property": config.IdentifierFromProvider,
 	// No documentation on how to import
 	"github_repository_pull_request": config.IdentifierFromProvider,
 	// Can be imported using the following format: {{ repository }}:{{ ruleset id }}

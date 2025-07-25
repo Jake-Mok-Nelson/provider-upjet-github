@@ -132,6 +132,7 @@ or app authentication must have at least `admin:enterprise` scope.
 | `RepositoryAutolinkReference` | `repo`         | `github_repository_autolink_reference`            |                                                                                                                                                                                                                                                                                                                             |
 | `RepositoryCollaborator`      | `repo`         | `github_repository_collaborator`                  |                                                                                                                                                                                                                                                                                                                             |
 | `RepositoryFile`              | `repo`         | `github_repository_file`                          |                                                                                                                                                                                                                                                                                                                             |
+| `RepositoryCustomProperty`     | `repo`         | `github_repository_custom_property`               | Pre-requisite: the custom property must be defined at the org level. See the Terraform provider docs. |
 | `RepositoryRuleset`           | `repo`         | `github_repository_ruleset`                       |                                                                                                                                                                                                                                                                                                                             |
 | `RepositoryWebhook`           | `repo`         | `github_repository_webhook`                       |                                                                                                                                                                                                                                                                                                                             |
 | `TagProtection`               | `repo`         | `github_repository_tag_protection`                |                                                                                                                                                                                                                                                                                                                             |
@@ -174,35 +175,35 @@ index 505fa1c..50440d4 100644
 --- a/config/external_name.go
 +++ b/config/external_name.go
 @@ -18,6 +18,9 @@ var ExternalNameConfigs = map[string]config.ExternalName{
- 	// Imported by using the following format: {{ repository }}:{{ pattern }}
- 	// We cannot use the external_name = pattern here since pattern can contain non alpha numberic characters
- 	"github_branch_protection": config.IdentifierFromProvider,
+  // Imported by using the following format: {{ repository }}:{{ pattern }}
+  // We cannot use the external_name = pattern here since pattern can contain non alpha numberic characters
+  "github_branch_protection": config.IdentifierFromProvider,
 +  // Imported by using the following format: github_repository_file.gitignore {{repository}}/{{file}}:{{branch}}
 +  // We cannot use file as external name since filenames are not DNSSpec and metadata.name requires this.
 +  "github_repository_file": config.IdentifierFromProvider,
- 	// Imported by using the following format: {{ id / slug }}
- 	// The id in the state needs to use the numberic id of the team. Cannot make external_name nice
- 	"github_team": config.IdentifierFromProvider,
+  // Imported by using the following format: {{ id / slug }}
+  // The id in the state needs to use the numberic id of the team. Cannot make external_name nice
+  "github_team": config.IdentifierFromProvider,
 diff --git a/config/provider.go b/config/provider.go
 index e2d81bf..093bdf8 100644
 --- a/config/provider.go
 +++ b/config/provider.go
 @@ -12,6 +12,7 @@ import (
- 	"github.com/crossplane-contrib/provider-upjet-github/config/branchprotection"
- 	"github.com/crossplane-contrib/provider-upjet-github/config/defaultbranch"
- 	"github.com/crossplane-contrib/provider-upjet-github/config/repository"
+  "github.com/crossplane-contrib/provider-upjet-github/config/branchprotection"
+  "github.com/crossplane-contrib/provider-upjet-github/config/defaultbranch"
+  "github.com/crossplane-contrib/provider-upjet-github/config/repository"
 +	"github.com/crossplane-contrib/provider-upjet-github/config/repositoryfile"
- 	"github.com/crossplane-contrib/provider-upjet-github/config/team"
- 	"github.com/crossplane-contrib/provider-upjet-github/config/teamrepository"
- 	ujconfig "github.com/upbound/upjet/pkg/config"
+  "github.com/crossplane-contrib/provider-upjet-github/config/team"
+  "github.com/crossplane-contrib/provider-upjet-github/config/teamrepository"
+  ujconfig "github.com/upbound/upjet/pkg/config"
 @@ -40,6 +41,7 @@ func GetProvider() *ujconfig.Provider {
- 		// add custom config functions
- 		repository.Configure,
- 		branch.Configure,
+    // add custom config functions
+    repository.Configure,
+    branch.Configure,
 +    repositoryfile.Configure,
- 		team.Configure,
- 		teamrepository.Configure,
- 		defaultbranch.Configure,
+    team.Configure,
+    teamrepository.Configure,
+    defaultbranch.Configure,
 diff --git a/config/repositoryfile/config.go b/config/repositoryfile/config.go
 new file mode 100644
 index 0000000..5684451
